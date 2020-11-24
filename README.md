@@ -1,4 +1,4 @@
-# Slack Bot Weather
+# ☀️ Slack Bot Weather
 SlackBot to display weather everytime user asks the weather.
 
 ## Installation ##
