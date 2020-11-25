@@ -2,7 +2,7 @@ import slack
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-from flask import Flask, request
+from flask import Flask, request, Response
 from slackeventsapi import SlackEventAdapter
 import requests
 from datetime import datetime
@@ -22,9 +22,33 @@ def message(payLoad):
     event = payLoad.get('event', {})
     channel_id = event.get('channel')
     user_id = event.get('user')
-    text = event.get('text')
+    text = event.get('text') or 'Jakarta'
     
-    r = requests.get('http://api.openweathermap.org/data/2.5/weather?q=Jakarta&units=metric&appid='+os.getenv('OPENWEATHERMAP_KEY'))
+    weather = get_weather_api('Jakarta')
+    
+    if BOT_ID != user_id:
+        if 'weather' in text:
+            client.chat_postMessage(channel=channel_id, text=weather)
+            pass
+        else:
+            client.chat_postMessage(channel=channel_id, text='I am sorry but I dont understand what you are saying. Please type weather for weather information.')
+        pass
+    
+@app.route('/weather', methods=['POST'])
+def weather():
+    data = request.form
+    user_id = data.get('user_id')
+    channel_id = data.get('channel_id')
+    city = data.get('text') or 'Jakarta'
+    
+    if BOT_ID != user_id:
+        weather = get_weather_api(city)
+        client.chat_postMessage(channel=channel_id, text=weather)
+        
+    return Response(), 200
+
+def get_weather_api(city):
+    r = requests.get('http://api.openweathermap.org/data/2.5/weather?q='+city+'&units=metric&appid='+os.getenv('OPENWEATHERMAP_KEY'))
     json_object = r.json()
     degree_celcius = float(json_object['main']['temp'])    
     city = json_object['name']
@@ -36,14 +60,7 @@ def message(payLoad):
 
     weather = 'Hi! \n The Weather now for you in '+ city +' is: ' + weather_main_condition + ' with ' + weather_desc_condition + '. \n The Current Temperature is: ' +str(degree_celcius)+ ' Degree Celcius. \n Current Time: ' + dt_object
     
-    if BOT_ID != user_id:
-        if 'weather' in text:
-            client.chat_postMessage(channel=channel_id, text=weather)
-            pass
-        else:
-            client.chat_postMessage(channel=channel_id, text='I am sorry but I dont understand what you are saying. Please type weather for weather information.')
-        pass
-    
+    return weather
 
 if __name__ == "__main__":
     app.run(debug=True)
