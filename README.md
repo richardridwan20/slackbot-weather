@@ -49,8 +49,6 @@ https://home.openweathermap.org/
 
     Sign up to the OpenWeatherMap API by signing up on the link I gave on above. If you successfully registered then please find the key on your profile.
 
-
-
 Inspired by: 
 https://www.youtube.com/watch?v=KJ5bFv-IRFM (go Subscribe to Tech with Tim!)
 
